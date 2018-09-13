@@ -1,0 +1,413 @@
+<?php
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function paragraphs_table_field_formatter_info() {
+    return array(
+      'paragraphs_table_view' => array(
+        'label' => t('Paragraphs table '),
+        'field types' => array('paragraphs'),
+        'settings' => array(
+          'edit' => t('Edit'),
+          'delete' => t('Delete'),
+          'add' => t('Add'),
+          'duplicate' => t('Duplicate'),
+          'vertical' => false,
+          'ajax' => false,
+          'description' => TRUE,
+          'view_mode' => 'full',
+          'hide_empty' => true,
+          'empty' => TRUE,
+        ),
+      ),
+    );
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function paragraphs_table_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state)
+{
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $element = [];
+
+  $element['duplicate'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Duplicate Link title'),
+    '#description' => t("Leave the title empty if you don't want duplicate row"),
+    '#default_value' => !empty($settings['duplicate'])?$settings['duplicate']:'',
+  );
+  if ($display['type'] == 'paragraphs_table_view') {
+    $element['hide_empty'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide empty paragraphs'),
+      '#description' => t('If enabled, nothing will be displayed for an empty paragraphs (not even the add link).'),
+      '#default_value' => $settings['hide_empty'],
+    );
+    $element['empty'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide empty columns'),
+      '#description' => t('If checked, hide empty paragraphs table columns.'),
+      '#default_value' => $settings['empty'],
+    );
+    $element['vertical'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Table vertical'),
+      '#description' => t('If checked, table data will show in vertical mode.'),
+      '#default_value' => !empty($settings['vertical'])?$settings['vertical']:null,
+    );
+    $element['ajax'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use ajax to load'),
+      '#description' => t('If checked, ajax will load table data.'),
+      '#default_value' => !empty($settings['ajax'])?$settings['ajax']:null,
+    );
+  }
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function paragraphs_table_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $output = '';
+  if ($display['type'] == 'paragraphs_table_view') {
+    $output .= '<br>';
+    $output .= !empty($settings['hide_empty']) ? t('Empty paragraphs: Hidden') : t('Empty paragraphs: Shown');
+    $output .= '<br>';
+    $output .= !empty($settings['empty']) ? t('Empty columns: Hidden') : t('Empty columns: Shown');
+    $output .= '<br>';
+    $output .= !empty($settings['vertical']) ? t('Table mode: Vertical') : '';
+  }
+  return $output;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display)
+{
+  $element = array();
+  $settings = $display['settings'];
+
+  $display_view_mode = empty($display['settings']['view_mode']) ? 'full' : $display['settings']['view_mode'];
+  $view_mode = empty($instance['display'][$display_view_mode]['settings']['view_mode']) ? $display_view_mode : $instance['display'][$display_view_mode]['settings']['view_mode'];
+
+  // Don't display anything for an empty collection.
+  if (!empty($settings['hide_empty']) && empty($items)) {
+    return $element;
+  }
+  switch ($display['type']) {
+    case 'paragraphs_table_view':
+      $header = ['',''];
+      $field_names = array();
+      $item = current($items);
+      $paragraph = paragraphs_field_get_entity($item);
+      $fields = field_info_instances('paragraphs_item', $paragraph->bundle());
+      $bundle_name = paragraphs_bundle_load($paragraph->bundle())->name;
+
+      foreach ($fields as $field_paragraphs_item) {
+        $item_view_mode = !empty($field_paragraphs_item['display'][$view_mode]) ? $view_mode : 'default';
+        if ($field_paragraphs_item['display'][$item_view_mode]['type'] != 'hidden') {
+          $weight = $field_paragraphs_item['display'][$item_view_mode]['weight'];
+          $field_names[$weight] = $field_paragraphs_item['field_name'];
+          if ($field_paragraphs_item['display'][$item_view_mode]['label'] != 'hidden') {
+            $header[$weight] = array(
+              'data' => (
+              module_exists('i18n_field')) ? i18n_field_translate_property($field_paragraphs_item, 'label') : $field_paragraphs_item['label'],
+              'class' => $field_names[$weight],
+            );
+          }
+          else {
+            $header[$weight] = '';
+          }
+        }
+      }
+      if (module_exists('ds')) {
+        // Add Display Suite fields and settings.
+        $fields_ds = ds_get_fields('paragraphs_item');
+        $fields_ds_settings = ds_get_field_settings('paragraphs_item', $field['field_name'], $view_mode);
+        foreach ($fields_ds_settings as $name => $ds_settings) {
+          if (isset($fields_ds[$name])) {
+            $weight = $ds_settings['weight'];
+            $field_names[$weight] = $name;
+            $fields[$name]["label"] = $fields_ds[$name]['title'];
+            $header[$weight] = array(
+              'data' => ($ds_settings['label'] != 'hidden') ? $fields_ds[$name]['title'] : NULL,
+              'class' => $name,
+            );
+          }
+          if (in_array($name, $field_names)) {
+            $weight = array_search($name, $field_names);
+          }
+          // Allow to override field label using DS field format settings.
+          if (isset($weight) && isset($ds_settings['formatter_settings']['ft']['lb'])) {
+            $header[$weight]['data'] = t(check_plain($ds_settings['formatter_settings']['ft']['lb']));
+          }
+        }
+      }
+      if($settings['vertical']){
+        $header = [$bundle_name,''];
+      }
+      ksort($header);
+      ksort($field_names);
+
+      $rows = array();
+      $max_row = count($items);
+      foreach ($items as $delta => $item) {
+        $field_paragraphs = paragraphs_field_get_entity($item);
+        if (empty($field_paragraphs)) {
+          continue;
+        }
+        $view = $field_paragraphs->view($view_mode);
+        $id = $field_paragraphs->identifier();
+        $content = $view['paragraphs_item'][$id];
+        $column = array();
+        foreach ($field_names as $field_name) {
+          if (isset($content[$field_name])) {
+            $content[$field_name]['#label_display'] = 'hidden';
+          }
+          else {
+            $content[$field_name] = array(
+              '#markup' => '<span class="empty_field"></span>',
+              '#empty' => TRUE,
+            );
+          }
+          if(!$settings["vertical"]) {
+            $column[] = array(
+              'data' => $content[$field_name],
+              'class' => drupal_html_class($field_name),
+            );
+          }else{
+            if($settings['hide_empty'] && !empty($content[$field_name]["#empty"]) ) {
+              continue;
+            }
+            $fiels_value = [['data'=>$fields[$field_name]["label"]],['data'=>$content[$field_name]]];
+            $rows[] = array(
+              'data' => $fiels_value,
+              'class' => array('field-paragraphs-item'),
+            );
+          }
+        }
+        //dont show option if in revision mode
+        $isRevision = arg(2)=='revisions'?true:false;
+        //@todo add operation
+        $isRevision = true;
+        $links = '';
+        if(!$isRevision) {
+          $links = array(
+            '#theme' => 'links',
+            '#theme_wrapper' => 'item_list',
+            '#attributes' => array('class' => array('paragraphs-view-links')),
+          );
+          $operation = ['edit', 'delete'];
+          if(!empty($settings['duplicate']) && $settings['duplicate']){
+            $operation[] = 'duplicate';
+          }
+          foreach ($operation as $op) {
+            if (!empty($settings[$op]) && entity_access($op == 'edit' ? 'update' : $op, 'paragraphs_item', $field_paragraphs)) {
+
+              $links['#links'][$op] = array(
+                'title' => t(!empty($settings[$op])?$settings[$op]:$op),
+                'href' => $field_paragraphs->path() . '/' . $op,
+                'query' => drupal_get_destination(),
+                'html' => true,
+                'attributes' => ['title' =>ucfirst(t($op)),'data-toggle' =>"tooltip"]
+              );
+              if($op == 'duplicate') {
+                $fied_path = 'paragraphs/' . strtr($content['#bundle'], array('_' => '-'));
+                $links['#links'][$op]['href']= $fied_path.'/add/'.$settings['entity_type'].'/'.$settings['entity_id'].'/'. $field_paragraphs->item_id;
+              }
+              $header['operations'] = t('Operations');
+            }
+          }
+        }
+
+        if (!empty($links['#links'])) {
+          $column[] = array(
+            'data' => $links,
+            'class' => "field-operations",
+          );
+        }
+        if($settings['vertical'] && $delta < $max_row-1){
+          $break = array(
+            'data' => [$bundle_name,$links],
+            'class' => array('paragraphs_table_bundle'),
+          );
+          if(empty($links)){
+            $break['data']= [['data'=>'<strong>'.$bundle_name.'</strong>','colspan'=>2]];
+          }
+          $rows[] = $break;
+        }
+
+        $rows[] = array(
+          'data' => $column,
+          'class' => array('field-paragraphs-item'),
+        );
+      }
+
+      // Remove header if all labels are hidden.
+      if (!array_filter($header)) {
+        $header = array();
+      }
+
+      $element[0] = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+        '#attributes' => array(
+          'class' => array(
+            'field-paragraphs-table-view',
+            drupal_clean_css_identifier('view-mode-' . $view_mode),
+          ),
+        ),
+      );
+
+      if (!empty($settings['empty'])) {
+        _paragraphs_table_hide_empty($element[0]);
+      }
+      break;
+  }
+  return $element;
+}
+
+/**
+ * Remove columns that are entirely empty.
+ */
+function _paragraphs_table_hide_empty(&$variables) {
+  $rows = $variables['#rows'];
+
+  $count = array();
+  foreach ($rows as $row_delta => $row) {
+    foreach ($row['data'] as $column_delta => $column) {
+      if (!isset($count[$column_delta])) {
+        $count[$column_delta] = 0;
+      }
+      if (isset($column['data']['#empty'])) {
+        $count[$column_delta]++;
+      }
+    }
+  }
+  foreach ($count as $column_delta => $column) {
+    if ($column === count($rows)) {
+      foreach ($rows as $row_delta => $row) {
+        unset($variables['#rows'][$row_delta]['data'][$column_delta]);
+        unset($variables['#header'][$column_delta]);
+      }
+    }
+  }
+}
+
+function _paragraphs_table_get_field_value($paragraph, $field_name, $field_type) {
+    $items = field_get_items('paragraphs_item', $paragraph, $field_name);
+    $field_value = '';
+    if (is_array($items)) {
+        switch ($field_type) {
+            case 'taxonomy_term_reference':
+                foreach ($items as $item) {
+                    $field_view = field_view_value('paragraphs_item', $paragraph, $field_name, $item);
+                    $field_value.=$field_view['#title'] . ' ';
+                }
+                break;
+            case 'list_boolean':
+                foreach ($items as $item) {
+                    $field_value=$item['value'];
+                }
+                break;
+            default :
+                foreach ($items as $item) {
+                    $field_view = field_view_value('paragraphs_item', $paragraph, $field_name, $item);
+                    $field_value.=$field_view['#markup'] . ' ';
+                }
+                break;
+        }
+        return $field_value;
+    }
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function paragraphs_table_field_widget_info() {
+  return array(
+    'paragraphs_table' => array(
+      'label' => t('Table'),
+      'field types' => array('paragraphs'),
+      'behaviors' => array(
+        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+        'default value' => FIELD_BEHAVIOR_NONE,
+      ),
+      'settings' => array(
+        'nodragging' => FALSE,
+        'title_on_top' => TRUE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function paragraphs_table_field_widget_settings_form($field, $instance) {
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+
+  if ($widget['type'] == 'paragraphs_table') {
+    $form['nodragging'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Disable drag and drop'),
+      '#description' => t('If checked, users cannot rearrange the rows.'),
+      '#default_value' => $settings['nodragging'],
+    );
+    $form['title_on_top'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display title above table'),
+      '#description' => t('If checked, field title will appear above the table.'),
+      '#default_value' => $settings['title_on_top'],
+    );
+  }
+
+  return $form;
+}
+/**
+ * Implements hook_theme().
+ */
+function paragraphs_table_theme($existing, $type, $theme, $path) {
+  $base = array(
+    'file' => 'theme.inc',
+    'path' => $path . '/theme',
+  );
+  return array(
+    'paragraphs_table_multiple_value_fields' => $base + array('render element' => 'element'),
+  );
+}
+/**
+ * Implements hook_field_widget_form().
+ */
+function paragraphs_table_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  switch ($instance['widget']['type']) {
+    case 'paragraphs_table':
+      $instance['widget']['type'] = 'field_paragraphs_embed';
+      $element = paragraphs_field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state, $delta, $element);
+      break;
+  }
+  return $element;
+}
+function paragraphs_table_field_widget_form_build(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $element = paragraphs_field_widget_form_build($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
+  return $element;
+}
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ */
+function paragraphs_table_field_widget_paragraphs_table_form_alter(&$element, &$form_state, $context)
+{
+  $element['#theme'] = 'paragraphs_table_multiple_value_fields';
+}

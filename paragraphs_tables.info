@@ -1,0 +1,6 @@
+name =  paragraphs table
+description = Provides a paragraphs table formatter for paragraphs field
+package = Paragraphs
+core = 7.x
+version = "7.x-1.x-dev"
+dependencies[] = paragraphs
