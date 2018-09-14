@@ -1,4 +1,4 @@
-name =  paragraphs table
+name =  Paragraphs table
 description = Provides a paragraphs table formatter for paragraphs field
 package = Paragraphs
 core = 7.x

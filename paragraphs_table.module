@@ -4,24 +4,25 @@
  * Implements hook_field_formatter_info().
  */
 function paragraphs_table_field_formatter_info() {
-    return array(
-      'paragraphs_table_view' => array(
-        'label' => t('Paragraphs table '),
-        'field types' => array('paragraphs'),
-        'settings' => array(
-          'edit' => t('Edit'),
-          'delete' => t('Delete'),
-          'add' => t('Add'),
-          'duplicate' => t('Duplicate'),
-          'vertical' => false,
-          'ajax' => false,
-          'description' => TRUE,
-          'view_mode' => 'full',
-          'hide_empty' => true,
-          'empty' => TRUE,
-        ),
+  return array(
+    'paragraphs_table_view' => array(
+      'label' => t('Paragraphs table '),
+      'field types' => array('paragraphs'),
+      'settings' => array(
+        'edit' => t('Edit'),
+        'delete' => t('Delete'),
+        'add' => t('Add'),
+        'duplicate' => t('Duplicate'),
+        'vertical' => false,
+        'ajax' => false,
+        'datatables' => false,
+        'description' => TRUE,
+        'view_mode' => 'full',
+        'hide_empty' => true,
+        'empty' => TRUE,
       ),
-    );
+    ),
+  );
 }
 
 /**
@@ -67,6 +68,14 @@ function paragraphs_table_field_formatter_settings_form($field, $instance, $view
       '#description' => t('If checked, ajax will load table data.'),
       '#default_value' => !empty($settings['ajax'])?$settings['ajax']:null,
     );
+    if(module_exists('datatables')){
+      $element['datatables'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Support datatables'),
+        '#description' => t('If checked, datatables will load table data.'),
+        '#default_value' => !empty($settings['datatables'])?$settings['ajax']:null,
+      );
+    }
   }
   return $element;
 }
@@ -273,6 +282,21 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
       if (!empty($settings['empty'])) {
         _paragraphs_table_hide_empty($element[0]);
       }
+      if (!empty($settings['datatables'])) {
+        drupal_add_js('https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js', 'external');
+        drupal_add_js('https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js', 'external');
+        drupal_add_js('https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js', 'external');
+        drupal_add_js('https://cdn.datatables.net/buttons/1.5.2/js/buttons.bootstrap.min.js', 'external');
+        drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js', 'external');
+        drupal_add_js('https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js', 'external');
+        drupal_add_css('https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css', 'external');
+        drupal_add_css('https://cdn.datatables.net/buttons/1.5.2/css/buttons.bootstrap.min.css', 'external');
+        drupal_add_js(drupal_get_path('module', 'paragraphs_table') .'/js/datatables.js', 'file');
+      }
+
+      if (!empty($settings['ajax'])) {
+        //@todo
+      }
       break;
   }
   return $element;
@@ -306,30 +330,30 @@ function _paragraphs_table_hide_empty(&$variables) {
 }
 
 function _paragraphs_table_get_field_value($paragraph, $field_name, $field_type) {
-    $items = field_get_items('paragraphs_item', $paragraph, $field_name);
-    $field_value = '';
-    if (is_array($items)) {
-        switch ($field_type) {
-            case 'taxonomy_term_reference':
-                foreach ($items as $item) {
-                    $field_view = field_view_value('paragraphs_item', $paragraph, $field_name, $item);
-                    $field_value.=$field_view['#title'] . ' ';
-                }
-                break;
-            case 'list_boolean':
-                foreach ($items as $item) {
-                    $field_value=$item['value'];
-                }
-                break;
-            default :
-                foreach ($items as $item) {
-                    $field_view = field_view_value('paragraphs_item', $paragraph, $field_name, $item);
-                    $field_value.=$field_view['#markup'] . ' ';
-                }
-                break;
+  $items = field_get_items('paragraphs_item', $paragraph, $field_name);
+  $field_value = '';
+  if (is_array($items)) {
+    switch ($field_type) {
+      case 'taxonomy_term_reference':
+        foreach ($items as $item) {
+          $field_view = field_view_value('paragraphs_item', $paragraph, $field_name, $item);
+          $field_value.=$field_view['#title'] . ' ';
         }
-        return $field_value;
+        break;
+      case 'list_boolean':
+        foreach ($items as $item) {
+          $field_value=$item['value'];
+        }
+        break;
+      default :
+        foreach ($items as $item) {
+          $field_view = field_view_value('paragraphs_item', $paragraph, $field_name, $item);
+          $field_value.=$field_view['#markup'] . ' ';
+        }
+        break;
     }
+    return $field_value;
+  }
 }
 
 /**
