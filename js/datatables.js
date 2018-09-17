@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Javascript file for Paragraph table module.
+ */
+
 (function ($) {
   Drupal.behaviors.datatables = {
     attach: function (context, settings) {

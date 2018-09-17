@@ -1,24 +1,29 @@
 <?php
 
 /**
+ * @file
+ * Module file for Paragraph table module.
+ */
+
+/**
  * Implements hook_field_formatter_info().
  */
 function paragraphs_table_field_formatter_info() {
   return array(
     'paragraphs_table_view' => array(
-      'label' => t('Paragraphs table '),
+      'label' => t('Paragraphs table'),
       'field types' => array('paragraphs'),
       'settings' => array(
         'edit' => t('Edit'),
         'delete' => t('Delete'),
         'add' => t('Add'),
         'duplicate' => t('Duplicate'),
-        'vertical' => false,
-        'ajax' => false,
-        'datatables' => false,
+        'vertical' => FALSE,
+        'ajax' => FALSE,
+        'datatables' => FALSE,
         'description' => TRUE,
         'view_mode' => 'full',
-        'hide_empty' => true,
+        'hide_empty' => TRUE,
         'empty' => TRUE,
       ),
     ),
@@ -28,11 +33,7 @@ function paragraphs_table_field_formatter_info() {
 /**
  * Implements hook_field_formatter_settings_form().
  */
-/**
- * Implements hook_field_formatter_settings_form().
- */
-function paragraphs_table_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state)
-{
+function paragraphs_table_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
   $element = [];
@@ -41,7 +42,25 @@ function paragraphs_table_field_formatter_settings_form($field, $instance, $view
     '#type' => 'textfield',
     '#title' => t('Duplicate Link title'),
     '#description' => t("Leave the title empty if you don't want duplicate row"),
-    '#default_value' => !empty($settings['duplicate'])?$settings['duplicate']:'',
+    '#default_value' => !empty($settings['duplicate']) ? $settings['duplicate'] : '',
+  );
+  $element['add'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Add Link title'),
+    '#description' => t("Leave the title empty if you don't want add button"),
+    '#default_value' => !empty($settings['add']) ? $settings['add'] : '',
+  );
+  $element['edit'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Edit Link title'),
+    '#description' => t("Leave the title empty if you don't want edit row"),
+    '#default_value' => !empty($settings['edit']) ? $settings['edit'] : '',
+  );
+  $element['delete'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Delete Link title'),
+    '#description' => t("Leave the title empty if you don't want delete row"),
+    '#default_value' => !empty($settings['delete']) ? $settings['delete'] : '',
   );
   if ($display['type'] == 'paragraphs_table_view') {
     $element['hide_empty'] = array(
@@ -60,20 +79,20 @@ function paragraphs_table_field_formatter_settings_form($field, $instance, $view
       '#type' => 'checkbox',
       '#title' => t('Table vertical'),
       '#description' => t('If checked, table data will show in vertical mode.'),
-      '#default_value' => !empty($settings['vertical'])?$settings['vertical']:null,
+      '#default_value' => !empty($settings['vertical']) ? $settings['vertical'] : NULL,
     );
     $element['ajax'] = array(
       '#type' => 'checkbox',
       '#title' => t('Use ajax to load'),
       '#description' => t('If checked, ajax will load table data.'),
-      '#default_value' => !empty($settings['ajax'])?$settings['ajax']:null,
+      '#default_value' => !empty($settings['ajax']) ? $settings['ajax'] : NULL,
     );
-    if(module_exists('datatables')){
+    if (module_exists('datatables')) {
       $element['datatables'] = array(
         '#type' => 'checkbox',
         '#title' => t('Support datatables'),
         '#description' => t('If checked, datatables will load table data.'),
-        '#default_value' => !empty($settings['datatables'])?$settings['ajax']:null,
+        '#default_value' => !empty($settings['datatables']) ? $settings['ajax'] : NULL,
       );
     }
   }
@@ -101,8 +120,7 @@ function paragraphs_table_field_formatter_settings_summary($field, $instance, $v
 /**
  * Implements hook_field_formatter_view().
  */
-function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display)
-{
+function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
   $settings = $display['settings'];
 
@@ -115,7 +133,7 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
   }
   switch ($display['type']) {
     case 'paragraphs_table_view':
-      $header = ['',''];
+      $header = ['', ''];
       $field_names = array();
       $item = current($items);
       $paragraph = paragraphs_field_get_entity($item);
@@ -158,12 +176,12 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
           }
           // Allow to override field label using DS field format settings.
           if (isset($weight) && isset($ds_settings['formatter_settings']['ft']['lb'])) {
-            $header[$weight]['data'] = t(check_plain($ds_settings['formatter_settings']['ft']['lb']));
+            $header[$weight]['data'] = t("@ds_settings", array('@ds_settings' => check_plain($ds_settings['formatter_settings']['ft']['lb'])));
           }
         }
       }
-      if($settings['vertical']){
-        $header = [$bundle_name,''];
+      if ($settings['vertical']) {
+        $header = [$bundle_name, ''];
       }
       ksort($header);
       ksort($field_names);
@@ -189,50 +207,60 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
               '#empty' => TRUE,
             );
           }
-          if(!$settings["vertical"]) {
+          if (!$settings["vertical"]) {
             $column[] = array(
               'data' => $content[$field_name],
               'class' => drupal_html_class($field_name),
             );
-          }else{
-            if($settings['hide_empty'] && !empty($content[$field_name]["#empty"]) ) {
+          }
+          else {
+            if ($settings['hide_empty'] && !empty($content[$field_name]["#empty"])) {
               continue;
             }
-            $fiels_value = [['data'=>$fields[$field_name]["label"]],['data'=>$content[$field_name]]];
+            $fiels_value = [['data' => $fields[$field_name]["label"]], ['data' => $content[$field_name]]];
             $rows[] = array(
               'data' => $fiels_value,
               'class' => array('field-paragraphs-item'),
             );
           }
         }
-        //dont show option if in revision mode
-        $isRevision = arg(2)=='revisions'?true:false;
-        //@todo add operation
-        $isRevision = true;
+        // Dont show option if in revision mode.
+        $isrevision = arg(2) == 'revisions' ? TRUE : FALSE;
+        // @todo add operation
+        $isrevision = TRUE;
         $links = '';
-        if(!$isRevision) {
+        if (!$isrevision) {
           $links = array(
             '#theme' => 'links',
             '#theme_wrapper' => 'item_list',
             '#attributes' => array('class' => array('paragraphs-view-links')),
           );
           $operation = ['edit', 'delete'];
-          if(!empty($settings['duplicate']) && $settings['duplicate']){
+          if (!empty($settings['duplicate']) && $settings['duplicate']) {
             $operation[] = 'duplicate';
           }
           foreach ($operation as $op) {
             if (!empty($settings[$op]) && entity_access($op == 'edit' ? 'update' : $op, 'paragraphs_item', $field_paragraphs)) {
+              if (!empty($settings[$op])) {
+                $setting_op = $settings[$op];
+              }
+              else {
+                $setting_op = $op;
+              }
 
               $links['#links'][$op] = array(
-                'title' => t(!empty($settings[$op])?$settings[$op]:$op),
+                'title' => t("@setting_op", array('@setting_op' => check_plain($setting_op))),
                 'href' => $field_paragraphs->path() . '/' . $op,
                 'query' => drupal_get_destination(),
-                'html' => true,
-                'attributes' => ['title' =>ucfirst(t($op)),'data-toggle' =>"tooltip"]
+                'html' => TRUE,
+                'attributes' => [
+                  'title' => ucfirst(t('@op', array('@op' => $op))),
+                  'data-toggle' => "tooltip",
+                ],
               );
-              if($op == 'duplicate') {
+              if ($op == 'duplicate') {
                 $fied_path = 'paragraphs/' . strtr($content['#bundle'], array('_' => '-'));
-                $links['#links'][$op]['href']= $fied_path.'/add/'.$settings['entity_type'].'/'.$settings['entity_id'].'/'. $field_paragraphs->item_id;
+                $links['#links'][$op]['href'] = $fied_path . '/add/' . $settings['entity_type'] . '/' . $settings['entity_id'] . '/' . $field_paragraphs->item_id;
               }
               $header['operations'] = t('Operations');
             }
@@ -245,13 +273,13 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
             'class' => "field-operations",
           );
         }
-        if($settings['vertical'] && $delta < $max_row-1){
+        if ($settings['vertical'] && $delta < $max_row - 1) {
           $break = array(
-            'data' => [$bundle_name,$links],
+            'data' => [$bundle_name, $links],
             'class' => array('paragraphs_table_bundle'),
           );
-          if(empty($links)){
-            $break['data']= [['data'=>'<strong>'.$bundle_name.'</strong>','colspan'=>2]];
+          if (empty($links)) {
+            $break['data'] = [['data' => '<strong>' . $bundle_name . '</strong>', 'colspan' => 2]];
           }
           $rows[] = $break;
         }
@@ -291,11 +319,11 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
         drupal_add_js('https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js', 'external');
         drupal_add_css('https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css', 'external');
         drupal_add_css('https://cdn.datatables.net/buttons/1.5.2/css/buttons.bootstrap.min.css', 'external');
-        drupal_add_js(drupal_get_path('module', 'paragraphs_table') .'/js/datatables.js', 'file');
+        drupal_add_js(drupal_get_path('module', 'paragraphs_table') . '/js/datatables.js', 'file');
       }
 
       if (!empty($settings['ajax'])) {
-        //@todo
+        // @todo
       }
       break;
   }
@@ -329,6 +357,9 @@ function _paragraphs_table_hide_empty(&$variables) {
   }
 }
 
+/**
+ * Custom function to get field value.
+ */
 function _paragraphs_table_get_field_value($paragraph, $field_name, $field_type) {
   $items = field_get_items('paragraphs_item', $paragraph, $field_name);
   $field_value = '';
@@ -337,18 +368,20 @@ function _paragraphs_table_get_field_value($paragraph, $field_name, $field_type)
       case 'taxonomy_term_reference':
         foreach ($items as $item) {
           $field_view = field_view_value('paragraphs_item', $paragraph, $field_name, $item);
-          $field_value.=$field_view['#title'] . ' ';
+          $field_value .= $field_view['#title'] . ' ';
         }
         break;
+
       case 'list_boolean':
         foreach ($items as $item) {
-          $field_value=$item['value'];
+          $field_value = $item['value'];
         }
         break;
-      default :
+
+      default:
         foreach ($items as $item) {
           $field_view = field_view_value('paragraphs_item', $paragraph, $field_name, $item);
-          $field_value.=$field_view['#markup'] . ' ';
+          $field_value .= $field_view['#markup'] . ' ';
         }
         break;
     }
@@ -400,6 +433,7 @@ function paragraphs_table_field_widget_settings_form($field, $instance) {
 
   return $form;
 }
+
 /**
  * Implements hook_theme().
  */
@@ -412,6 +446,7 @@ function paragraphs_table_theme($existing, $type, $theme, $path) {
     'paragraphs_table_multiple_value_fields' => $base + array('render element' => 'element'),
   );
 }
+
 /**
  * Implements hook_field_widget_form().
  */
@@ -424,14 +459,102 @@ function paragraphs_table_field_widget_form(&$form, &$form_state, $field, $insta
   }
   return $element;
 }
+
+/**
+ * Implements hook_field_widget_form_build().
+ */
 function paragraphs_table_field_widget_form_build(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $element = paragraphs_field_widget_form_build($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
   return $element;
 }
+
 /**
  * Implements hook_field_widget_WIDGET_TYPE_form_alter().
  */
-function paragraphs_table_field_widget_paragraphs_table_form_alter(&$element, &$form_state, $context)
-{
+function paragraphs_table_field_widget_paragraphs_table_form_alter(&$element, &$form_state, $context) {
   $element['#theme'] = 'paragraphs_table_multiple_value_fields';
+}
+/**
+ * Returns the base path to use for pargraphs items.
+ */
+function paragraphs_field_get_path($field) {
+  if (empty($field['settings']['path'])) {
+    return 'paragraphs/' . strtr($field['field_name'], array('_' => '-'));
+  }
+  return $field['settings']['path'];
+}
+/**
+ * Implements hook_menu().
+ */
+function paragraphs_table_menu()
+{
+  $items = array();
+  // Add menu paths for viewing/editing/deleting/duplicate paragraphs items.
+  foreach (field_info_fields() as $field) {
+    if ($field['type'] == 'paragraphs') {
+      $path = paragraphs_field_get_path($field);
+      $count = count(explode('/', $path));
+
+      $items[$path . '/%pharagraphs_item'] = array(
+        'page callback' => 'pharagraphs_item_page_view',
+        'page arguments' => array($count),
+        'access callback' => 'entity_access',
+        'access arguments' => array('view', 'pharagraphs', $count),
+        'file' => 'pharagraphs_table.pages.inc',
+      );
+      $items[$path . '/%pharagraphs_item/view'] = array(
+        'title' => 'View',
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+        'weight' => -10,
+      );
+      $items[$path . '/%pharagraphs_item/edit'] = array(
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('pharagraphs_item_form', $count),
+        'access callback' => 'entity_access',
+        'access arguments' => array('update', 'pharagraphs_item', $count),
+        'title' => 'Edit',
+        'type' => MENU_LOCAL_TASK,
+        'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+        'file' => 'pharagraphs_table.pages.inc',
+      );
+      $items[$path . '/%pharagraphs_item/duplicate'] = array(
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('pharagraphs_item_add', $count),
+        'access callback' => 'entity_access',
+        'access arguments' => array('update', 'pharagraphs_item', $count),
+        'title' => 'Edit',
+        'type' => MENU_LOCAL_TASK,
+        'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+        'file' => 'pharagraphs_table.pages.inc',
+      );
+      $items[$path . '/%pharagraphs_item/delete'] = array(
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('pharagraphs_item_delete_confirm', $count),
+        'access callback' => 'entity_access',
+        'access arguments' => array('delete', 'pharagraphs_item', $count),
+        'title' => 'Delete',
+        'type' => MENU_LOCAL_TASK,
+        'context' => MENU_CONTEXT_INLINE,
+        'file' => 'pharagraphs_table.pages.inc',
+      );
+      // Add entity type and the entity id as additional arguments.
+      $items[$path . '/add/%/%'] = array(
+        'page callback' => 'pharagraphs_item_add',
+        'page arguments' => array($field['field_name'], $count + 1, $count + 2),
+        // The pace callback takes care of checking access itself.
+        'access callback' => TRUE,
+        'file' => 'pharagraphs_table.pages.inc',
+      );
+      // Add menu items for dealing with revisions.
+      $items[$path . '/%pharagraphs_item/revisions/%pharagraphs_item_revision'] = array(
+        'page callback' => 'pharagraphs_item_page_view',
+        'page arguments' => array($count + 2),
+        'access callback' => 'entity_access',
+        'access arguments' => array('view', 'pharagraphs_item', $count + 2),
+        'file' => 'pharagraphs_table.pages.inc',
+      );
+    }
+  }
+
+  return $items;
 }

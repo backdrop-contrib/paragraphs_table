@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Theme defined for Paragraph table module.
+ */
+
 /**
  * Replacement for theme_field_multiple_value_form().
  *
@@ -67,13 +73,13 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
 
       foreach (element_children($item) as $field_name) {
         // Don't add the _weight.
-        if (!$element['#custom_settings']['nodragging'] || !in_array($field_name, ['_weight','paragraph_bundle_title'])) {
+        if (!$element['#custom_settings']['nodragging'] || !in_array($field_name, ['_weight', 'paragraph_bundle_title'])) {
           if (!isset($item[$field_name]['#access']) || $item[$field_name]['#access']) {
             // Only add the header once.
             if ($key == 0) {
               $header[] = array(
                 'data' => '<label>' . t('!title', array('!title' => _field_paragraphs_table_get_title($item[$field_name]))) . '</label>',
-                'class' => array('field-label',drupal_html_class($field_name)),
+                'class' => array('field-label', drupal_html_class($field_name)),
               );
             }
             _field_paragraphs_table_remove_title($item[$field_name]);
@@ -176,7 +182,7 @@ function _field_paragraphs_table_get_title($field) {
       $title = $field[$language][0]['#title'];
       $required = !empty($field[$language][0]['#required']);
     }
-    if(empty($title) &&! empty($field[$language]['select']['#title'])){
+    if (empty($title) &&!empty($field[$language]['select']['#title'])) {
       $title = $field[$language]['select']['#title'];
     }
   }
@@ -195,6 +201,9 @@ function _field_paragraphs_table_get_title($field) {
   ));
 }
 
+/**
+ * Custom function _field_paragraphs_table_remove_title().
+ */
 function _field_paragraphs_table_remove_title(&$field) {
   if (isset($field['#language']) && isset($field[$field['#language']])) {
     $language = $field['#language'];
@@ -204,10 +213,10 @@ function _field_paragraphs_table_remove_title(&$field) {
     elseif (isset($field[$language][0]['#title'])) {
       $field[$language][0]['#title_display'] = 'none';
     }
-    if(!empty($field[$language]['select']['#title'])){
+    if (!empty($field[$language]['select']['#title'])) {
       $field[$language]['select']['#title_display'] = 'none';
     }
-    if(!empty($field[$language][0]["value"]["date"])){
+    if (!empty($field[$language][0]["value"]["date"])) {
       $field[$language][0]["value"]["date"]['#title_display'] = 'none';
       $field[$language][0]['#title_display'] = 'none';
     }
