@@ -27,7 +27,11 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
     $table_id = drupal_html_id($element['#field_name'] . '_values');
     $order_class = $element['#field_name'] . '-delta-order';
     $required = !empty($element['#required']) ? theme('form_required_marker', array('element' => $element)) : '';
-
+    $header = array(
+      array(
+        'data' => ''
+      ),
+    );
     $rows = array();
 
     // Sort items according to '_weight'.
