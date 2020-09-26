@@ -186,7 +186,7 @@ function _field_paragraphs_table_get_title($field) {
       $title = $field[$language][0]['#title'];
       $required = !empty($field[$language][0]['#required']);
     }
-    if (empty($title) &&!empty($field[$language]['select']['#title'])) {
+    if (empty($title) && !empty($field[$language]['select']['#title'])) {
       $title = $field[$language]['select']['#title'];
     }
   }

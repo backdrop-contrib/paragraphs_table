@@ -18,6 +18,7 @@ function paragraphs_table_field_formatter_info() {
         'delete' => t('Delete'),
         'add' => t('Add'),
         'duplicate' => t('Duplicate'),
+        'import' => t('Import'),
         'vertical' => FALSE,
         'ajax' => FALSE,
         'datatables' => FALSE,
@@ -40,10 +41,18 @@ function paragraphs_table_field_formatter_settings_form($field, $instance, $view
 
   $element['duplicate'] = array(
     '#type' => 'textfield',
-    '#title' => t('Duplicate Link title'),
-    '#description' => t("Leave the title empty if you don't want duplicate row"),
+    '#title' => t('Duplicate link title'),
+    '#description' => t("Leave it empty if you don't want duplicate row"),
     '#default_value' => !empty($settings['duplicate']) ? $settings['duplicate'] : '',
   );
+  if(module_exists('quick_data')){
+    $element['import'] = [
+      '#type' => 'textfield',
+      '#title' => t('Import link title'),
+      '#description' => t("Leave it blank if you don't want to import csv data"),
+      '#default_value' => !empty($settings['import']) ? $settings['import'] : '',
+    ];
+  }
   $element['add'] = array(
     '#type' => 'textfield',
     '#title' => t('Add Link title'),
@@ -306,6 +315,38 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
           ),
         ),
       );
+      if (!empty($settings['import'])) {
+        $entityHost = $paragraph->hostEntity();
+        $variable_link_import = [
+          $paragraph->hostEntityType(),
+          $paragraph->field_name,
+          $paragraph->hostEntityId()
+        ];
+        $title = t($settings['import']);
+        $attributes = [
+          'class' => ['import'],
+        ];
+        global $theme;
+        $base_theme = drupal_find_base_themes(list_themes(),$theme);
+        if (!empty($base_theme['bootstrap'])) {
+          $title = "<i class='glyphicon glyphicon-import'></i> " . t($settings['import']);
+          $attributes['class'][] = 'btn btn-warning';
+        }
+        $options = [
+          'query' => drupal_get_destination(),
+          'html' => TRUE,
+          'attributes' => $attributes,
+        ];
+        $item_list = [
+          '#theme' => 'item_list',
+          '#list_type' => 'ul',
+          '#items' => [
+            l($title , 'quick_data/import/paragraphs_item/' . implode('/', $variable_link_import), $options),
+          ],
+          '#attributes' => ['class' => ['action-links']],
+        ];
+        $element[0]["#suffix"] = drupal_render($item_list);
+      }
 
       if (!empty($settings['empty'])) {
         _paragraphs_table_hide_empty($element[0]);
