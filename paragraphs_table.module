@@ -45,7 +45,7 @@ function paragraphs_table_field_formatter_settings_form($field, $instance, $view
     '#description' => t("Leave it empty if you don't want duplicate row"),
     '#default_value' => !empty($settings['duplicate']) ? $settings['duplicate'] : '',
   );
-  if(module_exists('quick_data')){
+  if (module_exists('quick_data')) {
     $element['import'] = [
       '#type' => 'textfield',
       '#title' => t('Import link title'),
@@ -117,11 +117,11 @@ function paragraphs_table_field_formatter_settings_summary($field, $instance, $v
   $output = '';
   if ($display['type'] == 'paragraphs_table_view') {
     $output .= '<br>';
-    $output .= !empty($settings['hide_empty']) ? t('Empty paragraphs: Hidden') : t('Empty paragraphs: Shown');
+    $output .= !empty($settings['hide_empty'])?t('Empty paragraphs: Hidden') : t('Empty paragraphs: Shown');
     $output .= '<br>';
-    $output .= !empty($settings['empty']) ? t('Empty columns: Hidden') : t('Empty columns: Shown');
+    $output .= !empty($settings['empty'])?t('Empty columns: Hidden') : t('Empty columns: Shown');
     $output .= '<br>';
-    $output .= !empty($settings['vertical']) ? t('Table mode: Vertical') : '';
+    $output .= !empty($settings['vertical'])?t('Table mode: Vertical') : '';
   }
   return $output;
 }
@@ -157,7 +157,7 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
           if ($field_paragraphs_item['display'][$item_view_mode]['label'] != 'hidden') {
             $header[$weight] = array(
               'data' => (
-              module_exists('i18n_field')) ? i18n_field_translate_property($field_paragraphs_item, 'label') : $field_paragraphs_item['label'],
+              module_exists('i18n_field'))?i18n_field_translate_property($field_paragraphs_item, 'label') : $field_paragraphs_item['label'],
               'class' => $field_names[$weight],
             );
           }
@@ -219,7 +219,7 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
           if (!$settings["vertical"]) {
             $column[] = array(
               'data' => $content[$field_name],
-              'class' => drupal_html_class($field_name),
+              'class' => backdrop_html_class($field_name),
             );
           }
           else {
@@ -234,7 +234,7 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
           }
         }
         // Dont show option if in revision mode.
-        $isrevision = arg(2) == 'revisions' ? TRUE : FALSE;
+        $isrevision = arg(2) == 'revisions'?TRUE : FALSE;
         // @todo add operation
         $isrevision = TRUE;
         $links = '';
@@ -260,7 +260,7 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
               $links['#links'][$op] = array(
                 'title' => t("@setting_op", array('@setting_op' => check_plain($setting_op))),
                 'href' => $field_paragraphs->path() . '/' . $op,
-                'query' => drupal_get_destination(),
+                'query' => backdrop_get_destination(),
                 'html' => TRUE,
                 'attributes' => [
                   'title' => ucfirst(t('@op', array('@op' => $op))),
@@ -311,7 +311,7 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
         '#attributes' => array(
           'class' => array(
             'field-paragraphs-table-view',
-            drupal_clean_css_identifier('view-mode-' . $view_mode),
+            backdrop_clean_css_identifier('view-mode-' . $view_mode),
           ),
         ),
       );
@@ -327,13 +327,13 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
           'class' => ['import'],
         ];
         global $theme;
-        $base_theme = drupal_find_base_themes(list_themes(),$theme);
+        $base_theme = backdrop_find_base_themes(list_themes(), $theme);
         if (!empty($base_theme['bootstrap'])) {
           $title = "<i class='glyphicon glyphicon-import'></i> " . t($settings['import']);
           $attributes['class'][] = 'btn btn-warning';
         }
         $options = [
-          'query' => drupal_get_destination(),
+          'query' => backdrop_get_destination(),
           'html' => TRUE,
           'attributes' => $attributes,
         ];
@@ -341,26 +341,26 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
           '#theme' => 'item_list',
           '#list_type' => 'ul',
           '#items' => [
-            l($title , 'quick_data/import/paragraphs_item/' . implode('/', $variable_link_import), $options),
+            l($title, 'quick_data/import/paragraphs_item/' . implode('/', $variable_link_import), $options),
           ],
           '#attributes' => ['class' => ['action-links']],
         ];
-        $element[0]["#suffix"] = drupal_render($item_list);
+        $element[0]["#suffix"] = backdrop_render($item_list);
       }
 
       if (!empty($settings['empty'])) {
         _paragraphs_table_hide_empty($element[0]);
       }
       if (!empty($settings['datatables'])) {
-        drupal_add_js('https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js', 'external');
-        drupal_add_js('https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js', 'external');
-        drupal_add_js('https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js', 'external');
-        drupal_add_js('https://cdn.datatables.net/buttons/1.5.2/js/buttons.bootstrap.min.js', 'external');
-        drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js', 'external');
-        drupal_add_js('https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js', 'external');
-        drupal_add_css('https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css', 'external');
-        drupal_add_css('https://cdn.datatables.net/buttons/1.5.2/css/buttons.bootstrap.min.css', 'external');
-        drupal_add_js(drupal_get_path('module', 'paragraphs_table') . '/js/datatables.js', 'file');
+        backdrop_add_js('https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js', 'external');
+        backdrop_add_js('https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js', 'external');
+        backdrop_add_js('https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js', 'external');
+        backdrop_add_js('https://cdn.datatables.net/buttons/1.5.2/js/buttons.bootstrap.min.js', 'external');
+        backdrop_add_js('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js', 'external');
+        backdrop_add_js('https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js', 'external');
+        backdrop_add_css('https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css', 'external');
+        backdrop_add_css('https://cdn.datatables.net/buttons/1.5.2/css/buttons.bootstrap.min.css', 'external');
+        backdrop_add_js(backdrop_get_path('module', 'paragraphs_table') . '/js/datatables.js', 'file');
       }
 
       if (!empty($settings['ajax'])) {
@@ -527,8 +527,7 @@ function paragraphs_field_get_path($field) {
 /**
  * Implements hook_menu().
  */
-function paragraphs_table_menu()
-{
+function paragraphs_table_menu() {
   $items = array();
   // Add menu paths for viewing/editing/deleting/duplicate paragraphs items.
   foreach (field_info_fields() as $field) {
@@ -549,7 +548,7 @@ function paragraphs_table_menu()
         'weight' => -10,
       );
       $items[$path . '/%pharagraphs_item/edit'] = array(
-        'page callback' => 'drupal_get_form',
+        'page callback' => 'backdrop_get_form',
         'page arguments' => array('pharagraphs_item_form', $count),
         'access callback' => 'entity_access',
         'access arguments' => array('update', 'pharagraphs_item', $count),
@@ -559,7 +558,7 @@ function paragraphs_table_menu()
         'file' => 'pharagraphs_table.pages.inc',
       );
       $items[$path . '/%pharagraphs_item/duplicate'] = array(
-        'page callback' => 'drupal_get_form',
+        'page callback' => 'backdrop_get_form',
         'page arguments' => array('pharagraphs_item_add', $count),
         'access callback' => 'entity_access',
         'access arguments' => array('update', 'pharagraphs_item', $count),
@@ -569,7 +568,7 @@ function paragraphs_table_menu()
         'file' => 'pharagraphs_table.pages.inc',
       );
       $items[$path . '/%pharagraphs_item/delete'] = array(
-        'page callback' => 'drupal_get_form',
+        'page callback' => 'backdrop_get_form',
         'page arguments' => array('pharagraphs_item_delete_confirm', $count),
         'access callback' => 'entity_access',
         'access arguments' => array('delete', 'pharagraphs_item', $count),

@@ -34,8 +34,7 @@ function paragraphs_items_form($form, &$form_state, $paragraphs_items) {
 /**
  * Validation callback.
  */
-function paragraphs_items_form_validate($form, &$form_state) {
-}
+function paragraphs_items_form_validate($form, &$form_state) { }
 
 /**
  * Submit builder. Extracts the form values and updates the entity.
@@ -70,8 +69,8 @@ function paragraphs_items_delete_confirm($form, &$form_state, $paragraphs_items)
  */
 function paragraphs_items_delete_confirm_submit($form, &$form_state) {
   $paragraphs_items = $form_state['paragraphs_items'];
-  entity_delete('paragraphs_items',$paragraphs_items->item_id);
-  drupal_set_message(t('%label has been deleted.', array('%label' => drupal_ucfirst($paragraphs_items->label()))));
+  entity_delete('paragraphs_items', $paragraphs_items->item_id);
+  backdrop_set_message(t('%label has been deleted.', array('%label' => backdrop_ucfirst($paragraphs_items->label()))));
   $form_state['redirect'] = '<front>';
 }
 
@@ -98,10 +97,10 @@ function paragraphs_items_add($field_name, $entity_type, $entity_id, $revision_i
 
   // Check field cardinality.
   $field = field_info_field($field_name);
-  $langcode = !empty($field['translatable']) ? entity_language($entity_type, $entity) : LANGUAGE_NONE;
+  $langcode = !empty($field['translatable'])?entity_language($entity_type, $entity) : LANGUAGE_NONE;
 
   if (!($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED || !isset($entity->{$field_name}[$langcode]) || count($entity->{$field_name}[$langcode]) < $field['cardinality'])) {
-    drupal_set_message(t('Too many items.'), 'error');
+    backdrop_set_message(t('Too many items.'), 'error');
     return '';
   }
 
@@ -114,7 +113,7 @@ function paragraphs_items_add($field_name, $entity_type, $entity_id, $revision_i
 
   $label = $paragraphs_items->translatedInstanceLabel();
   $title = ($field['cardinality'] == 1) ? $label : t('Add new !instance_label', array('!instance_label' => $label));
-  drupal_set_title($title);
+  backdrop_set_title($title);
 
   // Make sure the current user has access to create a field collection item.
   global $user;
@@ -122,5 +121,5 @@ function paragraphs_items_add($field_name, $entity_type, $entity_id, $revision_i
   if (!entity_access('create', 'paragraphs_items', $paragraphs_items, $account)) {
     return MENU_ACCESS_DENIED;
   }
-  return drupal_get_form('paragraphs_items_form', $paragraphs_items);
+  return backdrop_get_form('paragraphs_items_form', $paragraphs_items);
 }

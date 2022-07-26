@@ -24,9 +24,9 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
   }
 
   if (isset($element['#cardinality']) && ($element['#cardinality'] > 1 || $element['#cardinality'] == FIELD_CARDINALITY_UNLIMITED)) {
-    $table_id = drupal_html_id($element['#field_name'] . '_values');
+    $table_id = backdrop_html_id($element['#field_name'] . '_values');
     $order_class = $element['#field_name'] . '-delta-order';
-    $required = !empty($element['#required']) ? theme('form_required_marker', array('element' => $element)) : '';
+    $required = !empty($element['#required'])?theme('form_required_marker', array('element' => $element)) : '';
     $header = array(
       array(
         'data' => ''
@@ -83,13 +83,13 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
             if ($key == 0) {
               $header[] = array(
                 'data' => '<label>' . t('!title', array('!title' => _field_paragraphs_table_get_title($item[$field_name]))) . '</label>',
-                'class' => array('field-label', drupal_html_class($field_name)),
+                'class' => array('field-label', backdrop_html_class($field_name)),
               );
             }
             _field_paragraphs_table_remove_title($item[$field_name]);
             $cells[] = array(
               'data' => $item[$field_name],
-              'class' => drupal_html_class($field_name),
+              'class' => backdrop_html_class($field_name),
             );
           }
         }
@@ -153,16 +153,16 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
         );
     }
 
-    $output = drupal_render($output);
+    $output = backdrop_render($output);
 
     // Add table drag.
     if (!$element['#custom_settings']['nodragging']) {
-      drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+      backdrop_add_tabledrag($table_id, 'order', 'sibling', $order_class);
     }
   }
   else {
     foreach (element_children($element) as $key) {
-      $output .= drupal_render($element[$key]);
+      $output .= backdrop_render($element[$key]);
     }
   }
   return $output;
@@ -198,7 +198,7 @@ function _field_paragraphs_table_get_title($field) {
     $title = $field['#value'];
     $required = !empty($field['#required']);
   }
-  $required = $required ? theme('form_required_marker', array('element' => $field)) : '';
+  $required = $required?theme('form_required_marker', array('element' => $field)) : '';
   return t('!title !required', array(
     '!title' => $title,
     '!required' => $required,

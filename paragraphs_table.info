@@ -1,6 +1,7 @@
 name =  Paragraphs table
 description = Provides a paragraphs table formatter for paragraphs field
 package = Paragraphs
-core = 7.x
+backdrop = 1.x
+type = module
 version = "7.x-1.x-dev"
 dependencies[] = paragraphs
