@@ -16,8 +16,8 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
 
   // Ensure default widget settings turn dragging off for field formatter
   // without custom settings.
-  if (!isset($element['#custom_settings'])) {
-    $element['#custom_settings'] = array(
+  if (!isset($element['#instance']['widget']['settings'])) {
+    $element['#instance']['widget']['settings'] = array(
       'nodragging' => TRUE,
       'title_on_top' => TRUE,
     );
@@ -49,7 +49,7 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
     }
 
     // No need to sort if nodragging is selected.
-    if (!$element['#custom_settings']['nodragging']) {
+    if (!$element['#instance']['widget']['settings']['nodragging']) {
       usort($items, '_field_sort_items_value_helper');
 
       // Add header for table dragging.
@@ -69,7 +69,7 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
       $cells = array();
 
       // Add classes for dragging if needed.
-      if (!$element['#custom_settings']['nodragging']) {
+      if (!$element['#instance']['widget']['settings']['nodragging']) {
         $cells = array(
           array('data' => '', 'class' => 'field-multiple-drag'),
         );
@@ -77,7 +77,7 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
 
       foreach (element_children($item) as $field_name) {
         // Don't add the _weight.
-        if (!$element['#custom_settings']['nodragging'] || !in_array($field_name, ['_weight', 'paragraph_bundle_title'])) {
+        if (!$element['#instance']['widget']['settings']['nodragging'] || !in_array($field_name, ['_weight', 'paragraph_bundle_title'])) {
           if (!isset($item[$field_name]['#access']) || $item[$field_name]['#access']) {
             // Only add the header once.
             if ($key == 0) {
@@ -95,7 +95,7 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
         }
       }
       // Mark rows as draggable if needed.
-      if (!$element['#custom_settings']['nodragging']) {
+      if (!$element['#instance']['widget']['settings']['nodragging']) {
         $rows[] = array(
           'data' => $cells,
           'class' => array('draggable'),
@@ -113,7 +113,7 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
       '#suffix' => '</div>',
     );
 
-    if ($element['#custom_settings']['title_on_top']) {
+    if ($element['#instance']['widget']['settings']['title_on_top']) {
       $output['title'] = array(
         '#prefix' => "<label class='form-item-title'>",
         '#markup' => t('!title !required', array(
@@ -156,7 +156,7 @@ function theme_paragraphs_table_multiple_value_fields($variables) {
     $output = backdrop_render($output);
 
     // Add table drag.
-    if (!$element['#custom_settings']['nodragging']) {
+    if (!$element['#instance']['widget']['settings']['nodragging']) {
       backdrop_add_tabledrag($table_id, 'order', 'sibling', $order_class);
     }
   }

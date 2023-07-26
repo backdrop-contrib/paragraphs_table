@@ -3,5 +3,4 @@ description = Provides a paragraphs table formatter for paragraphs field
 package = Paragraphs
 backdrop = 1.x
 type = module
-version = "7.x-1.x-dev"
 dependencies[] = paragraphs
