@@ -97,7 +97,7 @@ function paragraphs_items_add($field_name, $entity_type, $entity_id, $revision_i
 
   // Check field cardinality.
   $field = field_info_field($field_name);
-  $langcode = !empty($field['translatable'])?entity_language($entity_type, $entity) : LANGUAGE_NONE;
+  $langcode = !empty($field['translatable']) ? entity_language($entity_type, $entity) : LANGUAGE_NONE;
 
   if (!($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED || !isset($entity->{$field_name}[$langcode]) || count($entity->{$field_name}[$langcode]) < $field['cardinality'])) {
     backdrop_set_message(t('Too many items.'), 'error');
