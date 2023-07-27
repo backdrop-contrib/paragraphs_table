@@ -203,7 +203,7 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
           continue;
         }
         $view = $field_paragraphs->view($view_mode);
-        $id = $field_paragraphs->identifier();
+        $id = $field_paragraphs->id();
         $content = $view['paragraphs_item'][$id];
         $column = array();
         foreach ($field_names as $field_name) {
@@ -234,7 +234,7 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
           }
         }
         // Dont show option if in revision mode.
-        $isrevision = arg(2) == 'revisions'?TRUE : FALSE;
+        $isrevision = arg(2) == 'revisions' ? TRUE : FALSE;
         // @todo add operation
         $isrevision = TRUE;
         $links = '';
@@ -316,7 +316,6 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
         ),
       );
       if (!empty($settings['import'])) {
-        $entityHost = $paragraph->hostEntity();
         $variable_link_import = [
           $paragraph->hostEntityType(),
           $paragraph->field_name,
