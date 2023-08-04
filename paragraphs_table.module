@@ -14,11 +14,11 @@ function paragraphs_table_field_formatter_info() {
       'label' => t('Paragraphs table'),
       'field types' => array('paragraphs'),
       'settings' => array(
-        'edit' => t('Edit'),
-        'delete' => t('Delete'),
-        'add' => t('Add'),
-        'duplicate' => t('Duplicate'),
-        'import' => t('Import'),
+        'edit' => FALSE,
+        'delete' => FALSE,
+        'add' => FALSE,
+        'duplicate' => FALSE,
+        'import' => FALSE,
         'vertical' => FALSE,
         'ajax' => FALSE,
         'datatables' => FALSE,
@@ -39,38 +39,38 @@ function paragraphs_table_field_formatter_settings_form($field, $instance, $view
   $settings = $display['settings'];
   $element = [];
 
-  $element['duplicate'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Duplicate link title'),
-    '#description' => t("Leave it empty if you don't want duplicate row"),
-    '#default_value' => !empty($settings['duplicate']) ? $settings['duplicate'] : '',
-  );
-  if (module_exists('quick_data')) {
-    $element['import'] = [
-      '#type' => 'textfield',
-      '#title' => t('Import link title'),
-      '#description' => t("Leave it blank if you don't want to import csv data"),
-      '#default_value' => !empty($settings['import']) ? $settings['import'] : '',
-    ];
-  }
-  $element['add'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Add Link title'),
-    '#description' => t("Leave the title empty if you don't want add button"),
-    '#default_value' => !empty($settings['add']) ? $settings['add'] : '',
-  );
-  $element['edit'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Edit Link title'),
-    '#description' => t("Leave the title empty if you don't want edit row"),
-    '#default_value' => !empty($settings['edit']) ? $settings['edit'] : '',
-  );
-  $element['delete'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Delete Link title'),
-    '#description' => t("Leave the title empty if you don't want delete row"),
-    '#default_value' => !empty($settings['delete']) ? $settings['delete'] : '',
-  );
+  // $element['duplicate'] = array(
+  //   '#type' => 'textfield',
+  //   '#title' => t('Duplicate link title'),
+  //   '#description' => t("Leave it empty if you don't want duplicate row."),
+  //   '#default_value' => !empty($settings['duplicate']) ? $settings['duplicate'] : '',
+  // );
+  // if (module_exists('quick_data')) {
+  //   $element['import'] = [
+  //     '#type' => 'textfield',
+  //     '#title' => t('Import link title'),
+  //     '#description' => t("Leave it blank if you don't want to import csv data."),
+  //     '#default_value' => !empty($settings['import']) ? $settings['import'] : '',
+  //   ];
+  // }
+  // $element['add'] = array(
+  //   '#type' => 'textfield',
+  //   '#title' => t('Add Link title'),
+  //   '#description' => t("Leave the title empty if you don't want add button."),
+  //   '#default_value' => !empty($settings['add']) ? $settings['add'] : '',
+  // );
+  // $element['edit'] = array(
+  //   '#type' => 'textfield',
+  //   '#title' => t('Edit Link title'),
+  //   '#description' => t("Leave the title empty if you don't want edit row."),
+  //   '#default_value' => !empty($settings['edit']) ? $settings['edit'] : '',
+  // );
+  // $element['delete'] = array(
+  //   '#type' => 'textfield',
+  //   '#title' => t('Delete Link title'),
+  //   '#description' => t("Leave the title empty if you don't want delete row."),
+  //   '#default_value' => !empty($settings['delete']) ? $settings['delete'] : '',
+  // );
   if ($display['type'] == 'paragraphs_table_view') {
     $element['hide_empty'] = array(
       '#type' => 'checkbox',
@@ -226,9 +226,9 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
             if ($settings['hide_empty'] && !empty($content[$field_name]["#empty"])) {
               continue;
             }
-            $fiels_value = [['data' => $fields[$field_name]["label"]], ['data' => $content[$field_name]]];
+            $field_value = [['data' => $fields[$field_name]["label"]], ['data' => $content[$field_name]]];
             $rows[] = array(
-              'data' => $fiels_value,
+              'data' => $field_value,
               'class' => array('field-paragraphs-item'),
             );
           }
@@ -268,8 +268,8 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
                 ],
               );
               if ($op == 'duplicate') {
-                $fied_path = 'paragraphs/' . strtr($content['#bundle'], array('_' => '-'));
-                $links['#links'][$op]['href'] = $fied_path . '/add/' . $settings['entity_type'] . '/' . $settings['entity_id'] . '/' . $field_paragraphs->item_id;
+                $field_path = 'paragraphs/' . strtr($content['#bundle'], array('_' => '-'));
+                $links['#links'][$op]['href'] = $field_path . '/add/' . $settings['entity_type'] . '/' . $settings['entity_id'] . '/' . $field_paragraphs->item_id;
               }
               $header['operations'] = t('Operations');
             }
@@ -529,6 +529,8 @@ function paragraphs_field_get_path($field) {
 function paragraphs_table_menu() {
   $items = array();
   // Add menu paths for viewing/editing/deleting/duplicate paragraphs items.
+  // @todo ensure these menu routes actually work (go to actual forms
+  // and don't say "pharagraphs").
   foreach (field_info_fields() as $field) {
     if ($field['type'] == 'paragraphs') {
       $path = paragraphs_field_get_path($field);
