@@ -315,7 +315,7 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
           ),
         ),
       );
-      if (!empty($settings['import'])) {
+      if (!empty($settings['import']) && module_exists('quick_data')) {
         $variable_link_import = [
           $paragraph->hostEntityType(),
           $paragraph->field_name,
