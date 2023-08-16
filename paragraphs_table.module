@@ -146,6 +146,9 @@ function paragraphs_table_field_formatter_view($entity_type, $entity, $field, $i
       $field_names = array();
       $item = current($items);
       $paragraph = paragraphs_field_get_entity($item);
+      if (!$paragraph) {
+        return [];
+      }
       $fields = field_info_instances('paragraphs_item', $paragraph->bundle());
       $bundle_name = paragraphs_bundle_load($paragraph->bundle())->name;
 
